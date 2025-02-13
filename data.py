@@ -1,7 +1,16 @@
-def get_kit_body(name):
-    """Genera el cuerpo de la solicitud para crear un kit"""
-    return {"name": name}
+# Definir la plantilla del cuerpo de la solicitud
+kit_body_template = {
+    "name": "Ejemplo de kit"
+}
 
+# Función para generar un nuevo cuerpo de solicitud sin modificar el original
+def get_kit_body(name):
+    """Devuelve una copia de kit_body_template con el nombre modificado"""
+    kit_body = kit_body_template.copy()  # Copiamos el diccionario original
+    kit_body["name"] = name  # Reemplazamos el nombre
+    return kit_body
+
+# Función para obtener un token de usuario válido
 def get_new_user_token():
     """Devuelve un token de usuario válido (reemplazar con lógica real si es necesario)"""
-    return "jknnFApafP4awfAIFfafam2fma"  # Reemplázalo con un token válido
+    return "Bearer jknnFApafP4awfAIFfafam2fma"
