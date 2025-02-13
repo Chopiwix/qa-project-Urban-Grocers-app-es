@@ -1,38 +1,41 @@
 import requests
-from copy import copy
-from configuration import BASE_URL
 
-#funcion para crear el número permitido de caracteres (1)
-def post_new_client_kit(kit_body, auth_token):
-    """
-    Envía una solicitud para crear un nuevo kit.
-    :param kit_body: Diccionario con el cuerpo de la solicitud (datos del kit).
-    :param auth_token: Token de autenticación del usuario.
-    :return: Respuesta de la API.
-    """
-    kit_data = copy(kit_body)
+#  URL Base de la API
+BASE_URL = "https://cnt-b333ee19-b760-489d-bafd-edbf88794de0.containerhub.tripleten-services.com"
+KIT_URL = f"{BASE_URL}/api/v1/kits"
+
+#  Token de autenticación
+AUTH_TOKEN = "Bearer jknnFApafP4awfAIFfafam2fma"
+
+#  Pruebas para la creación de kits
+def test_kit_creation():
+    test_cases = [
+        {"name": "a", "expected_status": 201},  # 1 carácter
+        {"name": "El valor de prueba para esta comprobación será inferior a", "expected_status": 201},  # 511 caracteres
+        {"name": "", "expected_status": 400},  # 0 caracteres
+        {"name": "a" * 512, "expected_status": 400},  # 512 caracteres
+        {"name": "№%@,", "expected_status": 201},  # Caracteres especiales
+        {"name": " A Aaa ", "expected_status": 201},  # Espacios
+        {"name": "123", "expected_status": 201},  # Números
+        {"name": None, "expected_status": 400},  # Falta el parámetro
+        {"name": 123, "expected_status": 400},  # Número en vez de string
+    ]
+
     headers = {
-        "Authorization": f"Bearer {auth_token}",
+        "Authorization": AUTH_TOKEN,
         "Content-Type": "application/json"
     }
-    response = requests.post(f"{BASE_URL}/api/v1/kits", json=kit_data, headers=headers)
-    return response
 
-# Token de autenticación
-auth_token = "jknnFApafP4awfAIFfafam2fma"
+    for test in test_cases:
+        data = {"name": test["name"]} if test["name"] is not None else {}
 
-# Prueba de creación de un kit con un nombre de 1 carácter
-if __name__ == "__main__":
-    kit_body = { "name": "a" }  # Nombre del kit
-    response = post_new_client_kit(kit_body, auth_token)
+        response = requests.post(KIT_URL, json=data, headers=headers)
+        status_code = response.status_code
 
-    # Verificar el código de respuesta
-    if response.status_code == 200 or response.status_code == 201:
-        print("Código de respuesta:", response.status_code)
-        print("Respuesta del servidor:", response.json())
-    else:
-        print(f"Error: Código de respuesta {response.status_code}")
-        print("Cuerpo de la respuesta:", response.text)
+        # Comprobar si la respuesta coincide con la esperada
+        result = "✅PASA" if status_code == test["expected_status"] else "❌NO PASA"
+        print(f"{result} Prueba: {test['name']!r} -> Esperado: {test['expected_status']}, Obtenido: {status_code}")
 
-
+#  Ejecutar las pruebas
+test_kit_creation()
 
