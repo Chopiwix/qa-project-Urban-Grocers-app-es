@@ -23,5 +23,4 @@ def test_create_kit(test_case):
     
     print(f"{result} Prueba: {test_case['name']!r} -> Esperado: {test_case['expected_status']}, Obtenido: {status_code}")
 
-    # Aseguramos que el código de respuesta es el esperado
     assert status_code == test_case["expected_status"]
