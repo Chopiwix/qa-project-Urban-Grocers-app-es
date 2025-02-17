@@ -1,21 +1,43 @@
 import requests
-from data import get_kit_body  # Importamos la función para obtener el cuerpo del kit
+import data  # Importamos todo el archivo data.py
+import configuration  # Importamos configuration.py para usar las URLs de la API
 
-#  Configuración de la API
-BASE_URL = "https://cnt-b333ee19-b760-489d-bafd-edbf88794de0.containerhub.tripleten-services.com"
-KIT_URL = f"{BASE_URL}/api/v1/kits"
+# Función para generar un nuevo cuerpo de solicitud sin modificar el original
+def get_kit_body(name):
+    """Devuelve una copia de kit_body_template con el nombre modificado"""
+    kit_body = data.kit_body_template.copy()
+    kit_body["name"] = name  
+    return kit_body
 
-#  Función para crear un kit utilizando kit_body_template
-def post_new_client_kit(name, auth_token):
-    """Envía una solicitud POST para crear un kit de producto"""
+# Función para obtener un token de usuario válido
+def get_new_user_token():
+    """Devuelve un token de usuario válido"""
+    return data.headers["Authorization"]  # Usamos el token almacenado en data.py
 
-    kit_body = get_kit_body(name)  # Generamos el cuerpo usando la plantilla
-
-    headers = {
-        "Authorization": auth_token,
-        "Content-Type": "application/json"
-    }
-
-    response = requests.post(KIT_URL, json=kit_body, headers=headers)
+# Método "sender" para crear un nuevo usuario
+def post_new_user(user_body):
+    """Envía una solicitud POST para crear un usuario"""
     
-    return response  # Retornamos la respuesta para su verificación
+    response = requests.post(
+        configuration.BASE_URL + configuration.CREATE_USER_PATH,  # Construimos la URL correctamente
+        json=user_body,  # Cuerpo de la solicitud
+        headers=data.headers  # Usamos los headers definidos en data.py
+    )
+
+    return response  # Retorna la respuesta de la API
+
+# Método "sender" para crear un kit
+def post_new_client_kit(name):
+    """Envía una solicitud POST para crear un kit"""
+
+    kit_body = get_kit_body(name)  # Generamos el cuerpo del kit
+    auth_token = get_new_user_token()  # Obtenemos el token de usuario
+
+    response = requests.post(
+        configuration.BASE_URL + configuration.KITS_PATH,  # Construimos la URL correctamente
+        json=kit_body,  # Cuerpo de la solicitud
+        headers={"Authorization": auth_token, "Content-Type": "application/json"}
+    )
+
+    return response  # Retorna la respuesta de la API
+

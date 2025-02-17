@@ -1,27 +1,27 @@
-from sender_stand_request import post_new_client_kit
-from data import get_new_user_token  # Importamos la función para obtener el token
+import pytest
+import data  # Importamos todo data.py
+from sender_stand_request import post_new_client_kit  # Importamos la función para enviar la solicitud
 
-#  Obtener el token de autenticación
-AUTH_TOKEN = get_new_user_token()
+# Helper para obtener el token
+def get_token():
+    return data.headers["Authorization"]
 
-#  Casos de prueba 
-test_cases = [
-    {"name": "a", "expected_status": 201},  # 1 carácter
-    {"name": "AbcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdAbcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabC", "expected_status": 201},  # 511 caracteres
-    {"name": "", "expected_status": 400},  # 0 caracteres
-    {"name": "AbcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdAbcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcD", "expected_status": 400},  # 512 caracteres
-    {"name": "№%@,", "expected_status": 201},  # Caracteres especiales
-    {"name": " A Aaa ", "expected_status": 201},  # Espacios
-    {"name": "123", "expected_status": 201},  # Números
-    {"name": None, "expected_status": 400},  # Falta el parámetro
-    {"name": 123, "expected_status": 400},  # Número en vez de string
-]
+# Helper para obtener el cuerpo del kit
+def get_kit_body(name):
+    kit_body = data.kit_body_template.copy()
+    kit_body["name"] = name
+    return kit_body
 
-#  Ejecutar las pruebas
-for test in test_cases:
-    response = post_new_client_kit(test["name"], AUTH_TOKEN)
+# Pruebas con los casos de prueba importados
+@pytest.mark.parametrize("test_case", data.test_cases)  # Importamos los casos de prueba desde data.py
+def test_create_kit(test_case):
+    response = post_new_client_kit(test_case["name"])  # Enviamos la solicitud con el nombre del kit
     status_code = response.status_code
 
-    result = "✅PASA" if status_code == test["expected_status"] else "❌NO PASA"
+    # ✅ PASA si el código de estado es el esperado, ❌ NO PASA si es diferente
+    result = "✅ PASA" if status_code == test_case["expected_status"] else "❌ NO PASA"
     
-    print(f"{result} Prueba: {test['name']!r} -> Esperado: {test['expected_status']}, Obtenido: {status_code}")
+    print(f"{result} Prueba: {test_case['name']!r} -> Esperado: {test_case['expected_status']}, Obtenido: {status_code}")
+
+    # Aseguramos que el código de respuesta es el esperado
+    assert status_code == test_case["expected_status"]
